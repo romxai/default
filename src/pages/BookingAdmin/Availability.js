@@ -30,13 +30,13 @@ import {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const DAYS = [
-  { index: 1, label: "Monday",    short: "Mon" },
-  { index: 2, label: "Tuesday",   short: "Tue" },
+  { index: 1, label: "Monday", short: "Mon" },
+  { index: 2, label: "Tuesday", short: "Tue" },
   { index: 3, label: "Wednesday", short: "Wed" },
-  { index: 4, label: "Thursday",  short: "Thu" },
-  { index: 5, label: "Friday",    short: "Fri" },
-  { index: 6, label: "Saturday",  short: "Sat" },
-  { index: 0, label: "Sunday",    short: "Sun" },
+  { index: 4, label: "Thursday", short: "Thu" },
+  { index: 5, label: "Friday", short: "Fri" },
+  { index: 6, label: "Saturday", short: "Sat" },
+  { index: 0, label: "Sunday", short: "Sun" },
 ];
 
 const TIMEZONES = [
@@ -56,7 +56,7 @@ const TIMEZONES = [
 
 const EMPTY_OVERRIDE = {
   date_override: "",
-  rule_type: "one_time",   // "one_time" | "day_off"
+  rule_type: "one_time", // "one_time" | "day_off"
   start_time_utc: "09:00",
   end_time_utc: "17:00",
 };
@@ -68,18 +68,18 @@ function formatDateDisplay(dateStr) {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day).toLocaleDateString("en-US", {
     weekday: "short",
-    year:    "numeric",
-    month:   "long",
-    day:     "numeric",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const Availability = () => {
-  const dispatch       = useDispatch();
-  const allRules       = useSelector(selectAllRules);
-  const ownerTimezone  = useSelector(selectOwnerTimezone);
+  const dispatch = useDispatch();
+  const allRules = useSelector(selectAllRules);
+  const ownerTimezone = useSelector(selectOwnerTimezone);
 
   // Derived: recurring rules keyed by day_of_week
   const recurringByDay = allRules.reduce((acc, r) => {
@@ -101,8 +101,8 @@ const Availability = () => {
     if (localTimes[dayIndex]) return localTimes[dayIndex][field];
     const rule = recurringByDay[dayIndex];
     return field === "start"
-      ? (rule?.start_time_utc || "09:00")
-      : (rule?.end_time_utc   || "17:00");
+      ? rule?.start_time_utc || "09:00"
+      : rule?.end_time_utc || "17:00";
   };
 
   const handleTimeChange = (dayIndex, field, value) => {
@@ -110,7 +110,7 @@ const Availability = () => {
       ...prev,
       [dayIndex]: {
         start: field === "start" ? value : getTimeValue(dayIndex, "start"),
-        end:   field === "end"   ? value : getTimeValue(dayIndex, "end"),
+        end: field === "end" ? value : getTimeValue(dayIndex, "end"),
       },
     }));
   };
@@ -120,11 +120,11 @@ const Availability = () => {
     if (!rule) return;
     dispatch(
       updateRecurringDay({
-        day_of_week:    dayIndex,
-        is_available:   !rule.is_available,
+        day_of_week: dayIndex,
+        is_available: !rule.is_available,
         start_time_utc: rule.start_time_utc || "09:00",
-        end_time_utc:   rule.end_time_utc   || "17:00",
-      })
+        end_time_utc: rule.end_time_utc || "17:00",
+      }),
     );
   };
 
@@ -133,11 +133,11 @@ const Availability = () => {
     if (!local) return;
     dispatch(
       updateRecurringDay({
-        day_of_week:    dayIndex,
-        is_available:   recurringByDay[dayIndex]?.is_available ?? true,
+        day_of_week: dayIndex,
+        is_available: recurringByDay[dayIndex]?.is_available ?? true,
         start_time_utc: local.start,
-        end_time_utc:   local.end,
-      })
+        end_time_utc: local.end,
+      }),
     );
     setLocalTimes((prev) => {
       const next = { ...prev };
@@ -148,10 +148,10 @@ const Availability = () => {
 
   // ── Override modal state ──────────────────────────────────────────────────
   const [overrideModal, setOverrideModal] = useState(false);
-  const [overrideForm,  setOverrideForm]  = useState(EMPTY_OVERRIDE);
+  const [overrideForm, setOverrideForm] = useState(EMPTY_OVERRIDE);
   const [overrideErrors, setOverrideErrors] = useState({});
 
-  const [deleteModal,  setDeleteModal]  = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const handleOverrideFieldChange = (e) => {
@@ -164,8 +164,12 @@ const Availability = () => {
     if (!form.date_override) errors.date_override = "Date is required.";
     if (form.rule_type === "one_time") {
       if (!form.start_time_utc) errors.start_time_utc = "Start time required.";
-      if (!form.end_time_utc)   errors.end_time_utc   = "End time required.";
-      if (form.start_time_utc && form.end_time_utc && form.start_time_utc >= form.end_time_utc)
+      if (!form.end_time_utc) errors.end_time_utc = "End time required.";
+      if (
+        form.start_time_utc &&
+        form.end_time_utc &&
+        form.start_time_utc >= form.end_time_utc
+      )
         errors.end_time_utc = "End time must be after start time.";
     }
     return errors;
@@ -179,14 +183,20 @@ const Availability = () => {
     }
     dispatch(
       addRule({
-        owner_slug:     "dwayne",
-        rule_type:      overrideForm.rule_type,
-        day_of_week:    null,
-        date_override:  overrideForm.date_override,
-        start_time_utc: overrideForm.rule_type === "day_off" ? null : overrideForm.start_time_utc,
-        end_time_utc:   overrideForm.rule_type === "day_off" ? null : overrideForm.end_time_utc,
-        is_available:   overrideForm.rule_type !== "day_off",
-      })
+        owner_slug: "dwayne",
+        rule_type: overrideForm.rule_type,
+        day_of_week: null,
+        date_override: overrideForm.date_override,
+        start_time_utc:
+          overrideForm.rule_type === "day_off"
+            ? null
+            : overrideForm.start_time_utc,
+        end_time_utc:
+          overrideForm.rule_type === "day_off"
+            ? null
+            : overrideForm.end_time_utc,
+        is_available: overrideForm.rule_type !== "day_off",
+      }),
     );
     setOverrideModal(false);
     setOverrideForm(EMPTY_OVERRIDE);
@@ -198,7 +208,6 @@ const Availability = () => {
   return (
     <div className="page-content">
       <div className="container-fluid">
-
         {/* Page header */}
         <Row className="mb-3 align-items-center">
           <Col>
@@ -221,7 +230,9 @@ const Availability = () => {
           <CardBody>
             <Row className="align-items-center">
               <Col md={5}>
-                <Label for="tz-select" className="mb-1">Owner Timezone</Label>
+                <Label for="tz-select" className="mb-1">
+                  Owner Timezone
+                </Label>
                 <Input
                   type="select"
                   id="tz-select"
@@ -229,7 +240,9 @@ const Availability = () => {
                   onChange={(e) => dispatch(setOwnerTimezone(e.target.value))}
                 >
                   {TIMEZONES.map((tz) => (
-                    <option key={tz} value={tz}>{tz}</option>
+                    <option key={tz} value={tz}>
+                      {tz}
+                    </option>
                   ))}
                 </Input>
                 <small className="text-muted">
@@ -259,8 +272,8 @@ const Availability = () => {
               </thead>
               <tbody>
                 {DAYS.map(({ index, label }) => {
-                  const rule     = recurringByDay[index];
-                  const active   = rule?.is_available ?? false;
+                  const rule = recurringByDay[index];
+                  const active = rule?.is_available ?? false;
                   const hasDraft = !!localTimes[index];
 
                   return (
@@ -289,7 +302,9 @@ const Availability = () => {
                           style={{ maxWidth: "130px" }}
                           disabled={!active}
                           value={getTimeValue(index, "start")}
-                          onChange={(e) => handleTimeChange(index, "start", e.target.value)}
+                          onChange={(e) =>
+                            handleTimeChange(index, "start", e.target.value)
+                          }
                         />
                       </td>
 
@@ -301,7 +316,9 @@ const Availability = () => {
                           style={{ maxWidth: "130px" }}
                           disabled={!active}
                           value={getTimeValue(index, "end")}
-                          onChange={(e) => handleTimeChange(index, "end", e.target.value)}
+                          onChange={(e) =>
+                            handleTimeChange(index, "end", e.target.value)
+                          }
                         />
                       </td>
 
@@ -330,7 +347,9 @@ const Availability = () => {
           <CardHeader className="d-flex align-items-center">
             <i className="ri-calendar-close-line me-2 text-muted"></i>
             <span className="fw-semibold">Date Overrides</span>
-            <Badge color="secondary" className="ms-2">{overrides.length}</Badge>
+            <Badge color="secondary" className="ms-2">
+              {overrides.length}
+            </Badge>
             <Button
               size="sm"
               color="primary"
@@ -348,7 +367,8 @@ const Availability = () => {
             {overrides.length === 0 ? (
               <div className="text-center py-4 text-muted">
                 <i className="ri-calendar-check-line fs-2 d-block mb-2"></i>
-                No date overrides. Use overrides to block days off or change hours for specific dates.
+                No date overrides. Use overrides to block days off or change
+                hours for specific dates.
               </div>
             ) : (
               <Table className="align-middle mb-0">
@@ -363,14 +383,24 @@ const Availability = () => {
                 <tbody>
                   {overrides.map((ov) => (
                     <tr key={ov.id}>
-                      <td className="fw-semibold">{formatDateDisplay(ov.date_override)}</td>
+                      <td className="fw-semibold">
+                        {formatDateDisplay(ov.date_override)}
+                      </td>
                       <td>
                         {ov.rule_type === "day_off" ? (
-                          <Badge color="danger" className="d-flex align-items-center gap-1" style={{ width: "fit-content" }}>
+                          <Badge
+                            color="danger"
+                            className="d-flex align-items-center gap-1"
+                            style={{ width: "fit-content" }}
+                          >
                             <i className="ri-forbid-line"></i> Day Off
                           </Badge>
                         ) : (
-                          <Badge color="info" className="d-flex align-items-center gap-1" style={{ width: "fit-content" }}>
+                          <Badge
+                            color="info"
+                            className="d-flex align-items-center gap-1"
+                            style={{ width: "fit-content" }}
+                          >
                             <i className="ri-time-line"></i> Custom Hours
                           </Badge>
                         )}
@@ -406,7 +436,11 @@ const Availability = () => {
         </Card>
 
         {/* ── Add Override Modal ──────────────────────────────────────────── */}
-        <Modal isOpen={overrideModal} toggle={() => setOverrideModal(false)} centered>
+        <Modal
+          isOpen={overrideModal}
+          toggle={() => setOverrideModal(false)}
+          centered
+        >
           <ModalHeader toggle={() => setOverrideModal(false)}>
             <i className="ri-add-line me-2"></i>Add Date Override
           </ModalHeader>
@@ -459,7 +493,9 @@ const Availability = () => {
                   invalid={!!overrideErrors.date_override}
                 />
                 {overrideErrors.date_override && (
-                  <div className="invalid-feedback d-block">{overrideErrors.date_override}</div>
+                  <div className="invalid-feedback d-block">
+                    {overrideErrors.date_override}
+                  </div>
                 )}
               </FormGroup>
 
@@ -480,7 +516,9 @@ const Availability = () => {
                         invalid={!!overrideErrors.start_time_utc}
                       />
                       {overrideErrors.start_time_utc && (
-                        <div className="invalid-feedback d-block">{overrideErrors.start_time_utc}</div>
+                        <div className="invalid-feedback d-block">
+                          {overrideErrors.start_time_utc}
+                        </div>
                       )}
                     </FormGroup>
                   </Col>
@@ -498,7 +536,9 @@ const Availability = () => {
                         invalid={!!overrideErrors.end_time_utc}
                       />
                       {overrideErrors.end_time_utc && (
-                        <div className="invalid-feedback d-block">{overrideErrors.end_time_utc}</div>
+                        <div className="invalid-feedback d-block">
+                          {overrideErrors.end_time_utc}
+                        </div>
                       )}
                     </FormGroup>
                   </Col>
@@ -507,7 +547,9 @@ const Availability = () => {
             </Form>
           </ModalBody>
           <ModalFooter>
-            <Button color="light" onClick={() => setOverrideModal(false)}>Cancel</Button>
+            <Button color="light" onClick={() => setOverrideModal(false)}>
+              Cancel
+            </Button>
             <Button color="primary" onClick={handleOverrideSubmit}>
               <i className="ri-save-line me-1"></i>Save Override
             </Button>
@@ -515,14 +557,23 @@ const Availability = () => {
         </Modal>
 
         {/* ── Delete Override Confirm ─────────────────────────────────────── */}
-        <Modal isOpen={deleteModal} toggle={() => setDeleteModal(false)} centered size="sm">
-          <ModalHeader toggle={() => setDeleteModal(false)}>Remove Override</ModalHeader>
+        <Modal
+          isOpen={deleteModal}
+          toggle={() => setDeleteModal(false)}
+          centered
+          size="sm"
+        >
+          <ModalHeader toggle={() => setDeleteModal(false)}>
+            Remove Override
+          </ModalHeader>
           <ModalBody>
             Remove the override for{" "}
             <strong>{formatDateDisplay(deleteTarget?.date_override)}</strong>?
           </ModalBody>
           <ModalFooter>
-            <Button color="light" onClick={() => setDeleteModal(false)}>Cancel</Button>
+            <Button color="light" onClick={() => setDeleteModal(false)}>
+              Cancel
+            </Button>
             <Button
               color="danger"
               onClick={() => {
@@ -535,7 +586,6 @@ const Availability = () => {
             </Button>
           </ModalFooter>
         </Modal>
-
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ const toGCalDate = (isoStr) =>
   new Date(isoStr)
     .toISOString()
     .replace(/[-:]/g, "")
-    .replace(/\.\d{3}/, "");     // "20260303T090000Z"
+    .replace(/\.\d{3}/, ""); // "20260303T090000Z"
 
 /**
  * Build the Google Calendar "Add Event" redirect URL.
@@ -20,10 +20,10 @@ const toGCalDate = (isoStr) =>
  */
 const buildGCalUrl = ({ title, startISO, endISO, description, location }) => {
   const params = new URLSearchParams({
-    action:   "TEMPLATE",
-    text:     title,
-    dates:    `${toGCalDate(startISO)}/${toGCalDate(endISO)}`,
-    details:  description ?? "",
+    action: "TEMPLATE",
+    text: title,
+    dates: `${toGCalDate(startISO)}/${toGCalDate(endISO)}`,
+    details: description ?? "",
     location: location ?? "",
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
@@ -31,8 +31,12 @@ const buildGCalUrl = ({ title, startISO, endISO, description, location }) => {
 
 const formatDateTime = (isoStr, tz) =>
   new Date(isoStr).toLocaleString("en-US", {
-    weekday: "long", month: "long", day: "numeric",
-    year: "numeric", hour: "2-digit", minute: "2-digit",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     timeZone: tz,
   });
 
@@ -47,8 +51,8 @@ const LOCATION_LABELS = {
 
 const BookingConfirmationPage = () => {
   const { ownerSlug, eventTypeSlug } = useParams();
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Payload from BookingFormPage
   const { booking, eventType } = location.state ?? {};
@@ -58,8 +62,8 @@ const BookingConfirmationPage = () => {
   const allBookings = useSelector(selectAllBookings);
   const confirmedBooking = allBookings.find(
     (b) =>
-      b.start_time     === booking?.start_time &&
-      b.attendee_email === booking?.attendee_email
+      b.start_time === booking?.start_time &&
+      b.attendee_email === booking?.attendee_email,
   );
 
   const meetLink =
@@ -73,7 +77,10 @@ const BookingConfirmationPage = () => {
         <div className="text-center">
           <i className="ri-error-warning-line display-4 text-warning d-block mb-3" />
           <p className="text-muted">No booking data found.</p>
-          <Button color="primary" onClick={() => navigate(`/book/${ownerSlug}`)}>
+          <Button
+            color="primary"
+            onClick={() => navigate(`/book/${ownerSlug}`)}
+          >
             Book Again
           </Button>
         </div>
@@ -82,14 +89,15 @@ const BookingConfirmationPage = () => {
   }
 
   const gCalUrl = buildGCalUrl({
-    title:       eventType.title,
-    startISO:    booking.start_time,
-    endISO:      booking.end_time,
+    title: eventType.title,
+    startISO: booking.start_time,
+    endISO: booking.end_time,
     description: `${eventType.description}\n\nJoin: ${meetLink}`,
-    location:    meetLink,
+    location: meetLink,
   });
 
-  const locationLabel = LOCATION_LABELS[eventType.location_type] || eventType.location_type;
+  const locationLabel =
+    LOCATION_LABELS[eventType.location_type] || eventType.location_type;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -99,7 +107,6 @@ const BookingConfirmationPage = () => {
           <Col md={7} lg={6}>
             <Card className="shadow-sm border-0">
               <CardBody className="p-4 p-md-5">
-
                 {/* ── Success icon ─────────────────────────────────── */}
                 <div className="text-center mb-4">
                   <div
@@ -136,7 +143,9 @@ const BookingConfirmationPage = () => {
                   <div className="d-flex align-items-start gap-3">
                     <i className="ri-timer-line text-primary fs-18 flex-shrink-0 mt-1" />
                     <div>
-                      <p className="fw-semibold mb-0">{eventType.duration_minutes} minutes</p>
+                      <p className="fw-semibold mb-0">
+                        {eventType.duration_minutes} minutes
+                      </p>
                     </div>
                   </div>
 
@@ -158,15 +167,21 @@ const BookingConfirmationPage = () => {
                   <div className="d-flex align-items-start gap-3">
                     <i className="ri-user-line text-primary fs-18 flex-shrink-0 mt-1" />
                     <div>
-                      <p className="fw-semibold mb-0">{booking.attendee_name}</p>
-                      <p className="text-muted fs-13 mb-0">{booking.attendee_email}</p>
+                      <p className="fw-semibold mb-0">
+                        {booking.attendee_name}
+                      </p>
+                      <p className="text-muted fs-13 mb-0">
+                        {booking.attendee_email}
+                      </p>
                     </div>
                   </div>
 
                   <div className="d-flex align-items-start gap-3">
                     <i className="ri-global-line text-primary fs-18 flex-shrink-0 mt-1" />
                     <div>
-                      <p className="text-muted fs-13 mb-0">{booking.attendee_timezone}</p>
+                      <p className="text-muted fs-13 mb-0">
+                        {booking.attendee_timezone}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -181,7 +196,9 @@ const BookingConfirmationPage = () => {
                     {booking.custom_answers.map((a, i) => (
                       <div key={i} className="mb-2">
                         <p className="fw-medium fs-13 mb-0">{a.label}</p>
-                        <p className="text-muted fs-13 mb-0">{a.answer || "—"}</p>
+                        <p className="text-muted fs-13 mb-0">
+                          {a.answer || "—"}
+                        </p>
                       </div>
                     ))}
                   </>
@@ -225,14 +242,16 @@ const BookingConfirmationPage = () => {
 
                 {/* ── Google Calendar URL for transparency (dev) ─── */}
                 <details className="mt-4">
-                  <summary className="text-muted fs-12 cursor-pointer" style={{ cursor: "pointer" }}>
+                  <summary
+                    className="text-muted fs-12 cursor-pointer"
+                    style={{ cursor: "pointer" }}
+                  >
                     View Google Calendar redirect URL
                   </summary>
                   <code className="d-block mt-2 p-2 bg-light rounded fs-11 text-break">
                     {gCalUrl}
                   </code>
                 </details>
-
               </CardBody>
             </Card>
           </Col>

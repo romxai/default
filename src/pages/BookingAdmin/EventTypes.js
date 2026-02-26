@@ -31,37 +31,37 @@ import {
 
 const LOCATION_OPTIONS = [
   { value: "google_meet", label: "Google Meet" },
-  { value: "zoom",        label: "Zoom" },
-  { value: "phone",       label: "Phone Call" },
-  { value: "in_person",   label: "In Person" },
+  { value: "zoom", label: "Zoom" },
+  { value: "phone", label: "Phone Call" },
+  { value: "in_person", label: "In Person" },
 ];
 
 const LOCATION_ICON = {
   google_meet: "ri-video-chat-line",
-  zoom:        "ri-video-line",
-  phone:       "ri-phone-line",
-  in_person:   "ri-map-pin-line",
+  zoom: "ri-video-line",
+  phone: "ri-phone-line",
+  in_person: "ri-map-pin-line",
 };
 
 const LOCATION_LABEL = {
   google_meet: "Google Meet",
-  zoom:        "Zoom",
-  phone:       "Phone",
-  in_person:   "In Person",
+  zoom: "Zoom",
+  phone: "Phone",
+  in_person: "In Person",
 };
 
 const COLOR_OPTIONS = ["primary", "success", "warning", "info", "danger"];
 
 const EMPTY_FORM = {
-  title:              "",
-  slug:               "",
-  description:        "",
-  duration_minutes:   30,
-  location_type:      "google_meet",
+  title: "",
+  slug: "",
+  description: "",
+  duration_minutes: 30,
+  location_type: "google_meet",
   buffer_before_mins: 5,
-  buffer_after_mins:  10,
-  min_notice_mins:    60,
-  color:              "primary",
+  buffer_after_mins: 10,
+  min_notice_mins: 60,
+  color: "primary",
 };
 
 function slugify(str) {
@@ -74,25 +74,28 @@ function slugify(str) {
 
 function validateForm(form) {
   const errors = {};
-  if (!form.title.trim())           errors.title       = "Title is required.";
-  if (!form.slug.trim())            errors.slug        = "URL slug is required.";
-  if (!/^[a-z0-9-]+$/.test(form.slug)) errors.slug    = "Only lowercase letters, numbers, and hyphens.";
-  if (form.duration_minutes < 5)    errors.duration    = "Duration must be at least 5 minutes.";
-  if (form.min_notice_mins < 0)     errors.min_notice  = "Min notice cannot be negative.";
+  if (!form.title.trim()) errors.title = "Title is required.";
+  if (!form.slug.trim()) errors.slug = "URL slug is required.";
+  if (!/^[a-z0-9-]+$/.test(form.slug))
+    errors.slug = "Only lowercase letters, numbers, and hyphens.";
+  if (form.duration_minutes < 5)
+    errors.duration = "Duration must be at least 5 minutes.";
+  if (form.min_notice_mins < 0)
+    errors.min_notice = "Min notice cannot be negative.";
   return errors;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const EventTypes = () => {
-  const dispatch    = useDispatch();
-  const eventTypes  = useSelector(selectAllEventTypes);
+  const dispatch = useDispatch();
+  const eventTypes = useSelector(selectAllEventTypes);
 
   // ── Modal state ──────────────────────────────────────────────────────────
-  const [modalOpen,   setModalOpen]   = useState(false);
-  const [editingId,   setEditingId]   = useState(null); // null = create mode
-  const [form,        setForm]        = useState(EMPTY_FORM);
-  const [errors,      setErrors]      = useState({});
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null); // null = create mode
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [errors, setErrors] = useState({});
 
   // ── Delete confirm modal ─────────────────────────────────────────────────
   const [deleteModal, setDeleteModal] = useState(false);
@@ -110,15 +113,15 @@ const EventTypes = () => {
   const openEditModal = (et) => {
     setEditingId(et.id);
     setForm({
-      title:              et.title,
-      slug:               et.slug,
-      description:        et.description || "",
-      duration_minutes:   et.duration_minutes,
-      location_type:      et.location_type,
+      title: et.title,
+      slug: et.slug,
+      description: et.description || "",
+      duration_minutes: et.duration_minutes,
+      location_type: et.location_type,
       buffer_before_mins: et.buffer_before_mins,
-      buffer_after_mins:  et.buffer_after_mins,
-      min_notice_mins:    et.min_notice_mins,
-      color:              et.color || "primary",
+      buffer_after_mins: et.buffer_after_mins,
+      min_notice_mins: et.min_notice_mins,
+      color: et.color || "primary",
     });
     setErrors({});
     setModalOpen(true);
@@ -153,13 +156,13 @@ const EventTypes = () => {
       dispatch(
         addEventType({
           ...form,
-          owner_slug:            "dwayne",
-          is_active:             true,
-          date_range_start:      null,
-          date_range_end:        null,
-          max_bookings_per_day:  null,
-          custom_questions:      [],
-        })
+          owner_slug: "dwayne",
+          is_active: true,
+          date_range_start: null,
+          date_range_end: null,
+          max_bookings_per_day: null,
+          custom_questions: [],
+        }),
       );
     }
     setModalOpen(false);
@@ -183,7 +186,6 @@ const EventTypes = () => {
   return (
     <div className="page-content">
       <div className="container-fluid">
-
         {/* Page header */}
         <Row className="mb-3 align-items-center">
           <Col>
@@ -239,7 +241,11 @@ const EventTypes = () => {
                           <div className="d-flex align-items-center gap-2">
                             <span
                               className={`badge bg-${et.color || "primary"} rounded-circle p-1`}
-                              style={{ width: 10, height: 10, display: "inline-block" }}
+                              style={{
+                                width: 10,
+                                height: 10,
+                                display: "inline-block",
+                              }}
                             />
                             <div>
                               <div className="fw-semibold">{et.title}</div>
@@ -265,7 +271,8 @@ const EventTypes = () => {
                         {/* Buffers */}
                         <td>
                           <small className="text-muted">
-                            {et.buffer_before_mins}m before &nbsp;/&nbsp; {et.buffer_after_mins}m after
+                            {et.buffer_before_mins}m before &nbsp;/&nbsp;{" "}
+                            {et.buffer_after_mins}m after
                           </small>
                         </td>
 
@@ -277,9 +284,14 @@ const EventTypes = () => {
                               role="switch"
                               id={`toggle-${et.id}`}
                               checked={et.is_active}
-                              onChange={() => dispatch(toggleEventTypeActive(et.id))}
+                              onChange={() =>
+                                dispatch(toggleEventTypeActive(et.id))
+                              }
                             />
-                            <Label htmlFor={`toggle-${et.id}`} className="form-check-label ms-1">
+                            <Label
+                              htmlFor={`toggle-${et.id}`}
+                              className="form-check-label ms-1"
+                            >
                               {et.is_active ? (
                                 <Badge color="success">Active</Badge>
                               ) : (
@@ -333,9 +345,16 @@ const EventTypes = () => {
         </Card>
 
         {/* ── Create / Edit Modal ─────────────────────────────────────────── */}
-        <Modal isOpen={modalOpen} toggle={() => setModalOpen(false)} size="lg" scrollable>
+        <Modal
+          isOpen={modalOpen}
+          toggle={() => setModalOpen(false)}
+          size="lg"
+          scrollable
+        >
           <ModalHeader toggle={() => setModalOpen(false)}>
-            <i className={`${editingId ? "ri-edit-line" : "ri-add-line"} me-2`}></i>
+            <i
+              className={`${editingId ? "ri-edit-line" : "ri-add-line"} me-2`}
+            ></i>
             {editingId ? "Edit Event Type" : "Add New Event Type"}
           </ModalHeader>
           <ModalBody>
@@ -370,7 +389,9 @@ const EventTypes = () => {
                           type="button"
                           className={`btn btn-${c} rounded-circle p-0 ${form.color === c ? "border border-dark border-3" : ""}`}
                           style={{ width: 28, height: 28, minWidth: 28 }}
-                          onClick={() => setForm((prev) => ({ ...prev, color: c }))}
+                          onClick={() =>
+                            setForm((prev) => ({ ...prev, color: c }))
+                          }
                           title={c}
                         />
                       ))}
@@ -385,7 +406,9 @@ const EventTypes = () => {
                       URL Slug <span className="text-danger">*</span>
                     </Label>
                     <div className="input-group">
-                      <span className="input-group-text text-muted">/book/dwayne/</span>
+                      <span className="input-group-text text-muted">
+                        /book/dwayne/
+                      </span>
                       <Input
                         id="et-slug"
                         name="slug"
@@ -396,7 +419,9 @@ const EventTypes = () => {
                       />
                       <FormFeedback>{errors.slug}</FormFeedback>
                     </div>
-                    <small className="text-muted">Lowercase letters, numbers, hyphens only.</small>
+                    <small className="text-muted">
+                      Lowercase letters, numbers, hyphens only.
+                    </small>
                   </FormGroup>
                 </Col>
 
@@ -448,7 +473,9 @@ const EventTypes = () => {
                       onChange={handleFieldChange}
                     >
                       {LOCATION_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
                       ))}
                     </Input>
                   </FormGroup>
@@ -501,7 +528,9 @@ const EventTypes = () => {
                       invalid={!!errors.min_notice}
                     />
                     <FormFeedback>{errors.min_notice}</FormFeedback>
-                    <small className="text-muted">How far ahead attendees must book.</small>
+                    <small className="text-muted">
+                      How far ahead attendees must book.
+                    </small>
                   </FormGroup>
                 </Col>
               </Row>
@@ -512,31 +541,42 @@ const EventTypes = () => {
               Cancel
             </Button>
             <Button color="primary" onClick={handleSubmit}>
-              <i className={`${editingId ? "ri-save-line" : "ri-add-line"} me-1`}></i>
+              <i
+                className={`${editingId ? "ri-save-line" : "ri-add-line"} me-1`}
+              ></i>
               {editingId ? "Save Changes" : "Create Event Type"}
             </Button>
           </ModalFooter>
         </Modal>
 
         {/* ── Delete Confirm Modal ────────────────────────────────────────── */}
-        <Modal isOpen={deleteModal} toggle={() => setDeleteModal(false)} centered size="sm">
-          <ModalHeader toggle={() => setDeleteModal(false)}>Delete Event Type</ModalHeader>
+        <Modal
+          isOpen={deleteModal}
+          toggle={() => setDeleteModal(false)}
+          centered
+          size="sm"
+        >
+          <ModalHeader toggle={() => setDeleteModal(false)}>
+            Delete Event Type
+          </ModalHeader>
           <ModalBody>
             <p className="mb-1">
               Delete <strong>{deleteTarget?.title}</strong>?
             </p>
             <p className="text-muted small mb-0">
-              This cannot be undone. Existing bookings for this event type will remain in the system.
+              This cannot be undone. Existing bookings for this event type will
+              remain in the system.
             </p>
           </ModalBody>
           <ModalFooter>
-            <Button color="light" onClick={() => setDeleteModal(false)}>Cancel</Button>
+            <Button color="light" onClick={() => setDeleteModal(false)}>
+              Cancel
+            </Button>
             <Button color="danger" onClick={handleDeleteConfirm}>
               <i className="ri-delete-bin-line me-1"></i>Delete
             </Button>
           </ModalFooter>
         </Modal>
-
       </div>
     </div>
   );

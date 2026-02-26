@@ -60,12 +60,12 @@ import DashboardNFT from "./dashboardNFT/reducer";
 import Team from "./team/reducer";
 
 // File Manager
-import FileManager from "./fileManager/reducer"
+import FileManager from "./fileManager/reducer";
 
 // To do
-import Todos from "./todos/reducer"
+import Todos from "./todos/reducer";
 
-//Job 
+//Job
 import Jobs from "./job/reducer";
 
 //API Key
@@ -79,38 +79,38 @@ import {
 } from "../slices/booking";
 
 const rootReducer = combineReducers({
-    // public
-    Layout,
-    Login,
-    Account,
-    ForgetPassword,
-    Profile,
-    Calendar,
-    chat,
-    Projects,
-    Ecommerce,
-    Tasks,
-    changeNumber,
-    Crypto,
-    Tickets,
-    Crm,
-    Invoice,
-    Mailbox,
-    DashboardAnalytics,
-    DashboardCRM,
-    DashboardEcommerce,
-    DashboardCrypto,
-    DashboardProject,
-    DashboardNFT,
-    Team,
-    FileManager,
-    Todos,
-    Jobs,
-    APIKey,
-    // Booking Module
-    BookingEventTypes:   BookingEventTypesReducer,
-    BookingAvailability: BookingAvailabilityReducer,
-    BookingBookings:     BookingBookingsReducer,
+  // public
+  Layout,
+  Login,
+  Account,
+  ForgetPassword,
+  Profile,
+  Calendar,
+  chat,
+  Projects,
+  Ecommerce,
+  Tasks,
+  changeNumber,
+  Crypto,
+  Tickets,
+  Crm,
+  Invoice,
+  Mailbox,
+  DashboardAnalytics,
+  DashboardCRM,
+  DashboardEcommerce,
+  DashboardCrypto,
+  DashboardProject,
+  DashboardNFT,
+  Team,
+  FileManager,
+  Todos,
+  Jobs,
+  APIKey,
+  // Booking Module
+  BookingEventTypes: BookingEventTypesReducer,
+  BookingAvailability: BookingAvailabilityReducer,
+  BookingBookings: BookingBookingsReducer,
 });
 
 export default rootReducer;

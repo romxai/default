@@ -2,8 +2,17 @@ import React, { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  Container, Row, Col, Card, CardBody,
-  Form, FormGroup, Label, Input, FormFeedback, Button,
+  Container,
+  Row,
+  Col,
+  Card,
+  CardBody,
+  Form,
+  FormGroup,
+  Label,
+  Input,
+  FormFeedback,
+  Button,
 } from "reactstrap";
 import { addBooking } from "../../slices/booking/bookingsSlice";
 import { selectEventTypeBySlug } from "../../slices/booking";
@@ -12,8 +21,12 @@ import { selectEventTypeBySlug } from "../../slices/booking";
 
 const formatSlotDisplay = (isoStr, tz) =>
   new Date(isoStr).toLocaleString("en-US", {
-    weekday: "long", month: "long", day: "numeric",
-    year: "numeric", hour: "2-digit", minute: "2-digit",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
     timeZone: tz,
   });
 
@@ -28,29 +41,29 @@ const LOCATION_LABELS = {
 
 const BookingFormPage = () => {
   const { ownerSlug, eventTypeSlug } = useParams();
-  const navigate  = useNavigate();
-  const dispatch  = useDispatch();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const location = useLocation();
 
   // State passed from CalendarTimeSlotPage via navigate()
   const { slot, eventTypeId, selectedDate } = location.state ?? {};
 
   const eventType = useSelector(selectEventTypeBySlug(eventTypeSlug));
-  const clientTz  = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   // ── Form state ──────────────────────────────────────────────────────────
   const [fields, setFields] = useState({
-    attendee_name:     "",
-    attendee_email:    "",
+    attendee_name: "",
+    attendee_email: "",
     attendee_timezone: clientTz,
   });
   const [customAnswers, setCustomAnswers] = useState(
     (eventType?.custom_questions ?? []).reduce((acc, q) => {
       acc[q.id] = "";
       return acc;
-    }, {})
+    }, {}),
   );
-  const [errors, setErrors]   = useState({});
+  const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
 
   // ── Guard ────────────────────────────────────────────────────────────────
@@ -59,8 +72,13 @@ const BookingFormPage = () => {
       <div className="min-vh-100 bg-light d-flex align-items-center justify-content-center">
         <div className="text-center">
           <i className="ri-error-warning-line display-4 text-warning d-block mb-3" />
-          <p className="text-muted">Booking session expired or invalid. Please start over.</p>
-          <Button color="primary" onClick={() => navigate(`/book/${ownerSlug}`)}>
+          <p className="text-muted">
+            Booking session expired or invalid. Please start over.
+          </p>
+          <Button
+            color="primary"
+            onClick={() => navigate(`/book/${ownerSlug}`)}
+          >
             Start Over
           </Button>
         </div>
@@ -71,7 +89,7 @@ const BookingFormPage = () => {
   // ── Validation ───────────────────────────────────────────────────────────
   const validate = () => {
     const e = {};
-    if (!fields.attendee_name.trim())  e.attendee_name  = "Name is required.";
+    if (!fields.attendee_name.trim()) e.attendee_name = "Name is required.";
     if (!fields.attendee_email.trim()) e.attendee_email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.attendee_email))
       e.attendee_email = "Please enter a valid email address.";
@@ -87,20 +105,23 @@ const BookingFormPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const errs = validate();
-    if (Object.keys(errs).length) { setErrors(errs); return; }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      return;
+    }
     setSubmitting(true);
 
     const newBooking = {
-      event_type_id:     eventType.id,
-      attendee_name:     fields.attendee_name.trim(),
-      attendee_email:    fields.attendee_email.trim(),
+      event_type_id: eventType.id,
+      attendee_name: fields.attendee_name.trim(),
+      attendee_email: fields.attendee_email.trim(),
       attendee_timezone: fields.attendee_timezone,
-      start_time:        slot.start,
-      end_time:          slot.end,
+      start_time: slot.start,
+      end_time: slot.end,
       custom_answers: (eventType.custom_questions ?? []).map((q) => ({
         question_id: q.id,
-        label:       q.label,
-        answer:      customAnswers[q.id] ?? "",
+        label: q.label,
+        answer: customAnswers[q.id] ?? "",
       })),
     };
 
@@ -122,7 +143,8 @@ const BookingFormPage = () => {
     setErrors((prev) => ({ ...prev, [id]: undefined }));
   };
 
-  const locationLabel = LOCATION_LABELS[eventType.location_type] || eventType.location_type;
+  const locationLabel =
+    LOCATION_LABELS[eventType.location_type] || eventType.location_type;
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
@@ -130,20 +152,19 @@ const BookingFormPage = () => {
       <Container>
         <Row className="justify-content-center">
           <Col md={7} lg={6}>
-
             {/* Back */}
             <div className="mb-3">
               <button
                 className="btn btn-link text-muted p-0 fs-13"
                 onClick={() => navigate(-1)}
               >
-                <i className="ri-arrow-left-line me-1" />Back
+                <i className="ri-arrow-left-line me-1" />
+                Back
               </button>
             </div>
 
             <Card className="shadow-sm border-0">
               <CardBody className="p-4 p-md-5">
-
                 {/* ── Booking summary banner ─────────────────────── */}
                 <div className="p-3 bg-light rounded-3 mb-4">
                   <div className="d-flex align-items-start gap-3">
@@ -241,7 +262,9 @@ const BookingFormPage = () => {
                           type="textarea"
                           rows={3}
                           value={customAnswers[q.id] ?? ""}
-                          onChange={(e) => handleCustomChange(q.id, e.target.value)}
+                          onChange={(e) =>
+                            handleCustomChange(q.id, e.target.value)
+                          }
                           invalid={!!errors[q.id]}
                         />
                       ) : (
@@ -249,7 +272,9 @@ const BookingFormPage = () => {
                           id={q.id}
                           type={q.type === "number" ? "number" : "text"}
                           value={customAnswers[q.id] ?? ""}
-                          onChange={(e) => handleCustomChange(q.id, e.target.value)}
+                          onChange={(e) =>
+                            handleCustomChange(q.id, e.target.value)
+                          }
                           invalid={!!errors[q.id]}
                         />
                       )}
@@ -278,10 +303,8 @@ const BookingFormPage = () => {
                     </Button>
                   </div>
                 </Form>
-
               </CardBody>
             </Card>
-
           </Col>
         </Row>
       </Container>

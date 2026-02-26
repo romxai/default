@@ -15,21 +15,21 @@ const mockMeetLink = (id) =>
 const MOCK_BOOKINGS = [
   {
     id: "bk_001",
-    event_type_id: "et_001",           // 30-Min Introduction Call
+    event_type_id: "et_001", // 30-Min Introduction Call
     attendee_name: "Alice Thompson",
     attendee_email: "alice.thompson@example.com",
     attendee_timezone: "America/New_York",
     start_time: "2026-03-02T14:00:00Z",
     end_time: "2026-03-02T14:30:00Z",
     meet_link: mockMeetLink("bk_001"),
-    status: "confirmed",               // "confirmed" | "cancelled" | "rescheduled"
+    status: "confirmed", // "confirmed" | "cancelled" | "rescheduled"
     custom_answers: [],
     created_at: "2026-02-20T10:22:00Z",
     cancel_reason: null,
   },
   {
     id: "bk_002",
-    event_type_id: "et_002",           // 60-Min Paid Consultation
+    event_type_id: "et_002", // 60-Min Paid Consultation
     attendee_name: "Bob Martinez",
     attendee_email: "bob.martinez@example.com",
     attendee_timezone: "Europe/London",
@@ -63,7 +63,7 @@ const MOCK_BOOKINGS = [
   },
   {
     id: "bk_004",
-    event_type_id: "et_003",           // 15-Min Quick Sync
+    event_type_id: "et_003", // 15-Min Quick Sync
     attendee_name: "David Kim",
     attendee_email: "david.kim@example.com",
     attendee_timezone: "Asia/Seoul",
@@ -150,7 +150,8 @@ const bookingsSlice = createSlice({
       const booking = state.items.find((b) => b.id === action.payload.id);
       if (booking) {
         booking.status = "cancelled";
-        booking.cancel_reason = action.payload.cancel_reason ?? "Cancelled by owner";
+        booking.cancel_reason =
+          action.payload.cancel_reason ?? "Cancelled by owner";
       }
     },
 
@@ -201,7 +202,7 @@ export const selectAllBookings = (state) => state.BookingBookings.items;
 export const selectUpcomingBookings = (state) => {
   const now = new Date().toISOString();
   return state.BookingBookings.items.filter(
-    (b) => b.status === "confirmed" && b.start_time >= now
+    (b) => b.status === "confirmed" && b.start_time >= now,
   );
 };
 

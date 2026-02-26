@@ -26,19 +26,19 @@ import {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const STATUS_BADGE = {
-  confirmed:   { color: "success",   icon: "ri-checkbox-circle-line" },
-  cancelled:   { color: "danger",    icon: "ri-close-circle-line"    },
-  rescheduled: { color: "warning",   icon: "ri-refresh-line"         },
+  confirmed: { color: "success", icon: "ri-checkbox-circle-line" },
+  cancelled: { color: "danger", icon: "ri-close-circle-line" },
+  rescheduled: { color: "warning", icon: "ri-refresh-line" },
 };
 
 function formatDateTimeLocal(isoStr) {
   if (!isoStr) return "—";
   const d = new Date(isoStr);
   return d.toLocaleString("en-US", {
-    month:  "short",
-    day:    "numeric",
-    year:   "numeric",
-    hour:   "numeric",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
     minute: "2-digit",
     hour12: true,
     timeZone: "UTC",
@@ -51,29 +51,29 @@ function isUpcoming(isoStr) {
 }
 
 const FILTER_OPTIONS = [
-  { value: "all",         label: "All Bookings"  },
-  { value: "confirmed",   label: "Confirmed"     },
-  { value: "rescheduled", label: "Rescheduled"   },
-  { value: "cancelled",   label: "Cancelled"     },
+  { value: "all", label: "All Bookings" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "rescheduled", label: "Rescheduled" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const Bookings = () => {
-  const dispatch    = useDispatch();
-  const bookings    = useSelector(selectAllBookings);
-  const eventTypes  = useSelector(selectAllEventTypes);
+  const dispatch = useDispatch();
+  const bookings = useSelector(selectAllBookings);
+  const eventTypes = useSelector(selectAllEventTypes);
 
   const [statusFilter, setStatusFilter] = useState("all");
-  const [search,       setSearch]       = useState("");
+  const [search, setSearch] = useState("");
 
   // ── Cancel modal state ───────────────────────────────────────────────────
-  const [cancelModal,  setCancelModal]  = useState(false);
+  const [cancelModal, setCancelModal] = useState(false);
   const [cancelTarget, setCancelTarget] = useState(null);
   const [cancelReason, setCancelReason] = useState("");
 
   // ── Detail modal state ───────────────────────────────────────────────────
-  const [detailModal,  setDetailModal]  = useState(false);
+  const [detailModal, setDetailModal] = useState(false);
   const [detailTarget, setDetailTarget] = useState(null);
 
   // ── Derived data ─────────────────────────────────────────────────────────
@@ -107,7 +107,12 @@ const Bookings = () => {
 
   const handleCancelConfirm = () => {
     if (cancelTarget) {
-      dispatch(cancelBooking({ id: cancelTarget.id, cancel_reason: cancelReason || null }));
+      dispatch(
+        cancelBooking({
+          id: cancelTarget.id,
+          cancel_reason: cancelReason || null,
+        }),
+      );
     }
     setCancelModal(false);
     setCancelTarget(null);
@@ -120,16 +125,21 @@ const Bookings = () => {
   };
 
   // ── Summary counts ────────────────────────────────────────────────────────
-  const confirmedCount   = bookings.filter((b) => b.status === "confirmed").length;
-  const cancelledCount   = bookings.filter((b) => b.status === "cancelled").length;
-  const upcomingCount    = bookings.filter((b) => b.status === "confirmed" && isUpcoming(b.start_time)).length;
+  const confirmedCount = bookings.filter(
+    (b) => b.status === "confirmed",
+  ).length;
+  const cancelledCount = bookings.filter(
+    (b) => b.status === "cancelled",
+  ).length;
+  const upcomingCount = bookings.filter(
+    (b) => b.status === "confirmed" && isUpcoming(b.start_time),
+  ).length;
 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <div className="page-content">
       <div className="container-fluid">
-
         {/* Page header */}
         <Row className="mb-3 align-items-center">
           <Col>
@@ -223,7 +233,9 @@ const Bookings = () => {
                   style={{ minWidth: "150px" }}
                 >
                   {FILTER_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
                   ))}
                 </Input>
               </Col>
@@ -251,9 +263,10 @@ const Bookings = () => {
                   </thead>
                   <tbody>
                     {filtered.map((bk) => {
-                      const et           = eventTypeMap[bk.event_type_id];
-                      const badgeConfig  = STATUS_BADGE[bk.status] || {};
-                      const canCancel    = bk.status === "confirmed" && isUpcoming(bk.start_time);
+                      const et = eventTypeMap[bk.event_type_id];
+                      const badgeConfig = STATUS_BADGE[bk.status] || {};
+                      const canCancel =
+                        bk.status === "confirmed" && isUpcoming(bk.start_time);
 
                       return (
                         <tr key={bk.id}>
@@ -262,13 +275,22 @@ const Bookings = () => {
                             <div className="d-flex align-items-center gap-2">
                               <div
                                 className="rounded-circle bg-light border d-flex align-items-center justify-content-center text-muted fw-semibold"
-                                style={{ width: 36, height: 36, minWidth: 36, fontSize: 14 }}
+                                style={{
+                                  width: 36,
+                                  height: 36,
+                                  minWidth: 36,
+                                  fontSize: 14,
+                                }}
                               >
                                 {bk.attendee_name.charAt(0).toUpperCase()}
                               </div>
                               <div>
-                                <div className="fw-semibold">{bk.attendee_name}</div>
-                                <small className="text-muted">{bk.attendee_email}</small>
+                                <div className="fw-semibold">
+                                  {bk.attendee_name}
+                                </div>
+                                <small className="text-muted">
+                                  {bk.attendee_email}
+                                </small>
                               </div>
                             </div>
                           </td>
@@ -277,8 +299,13 @@ const Bookings = () => {
                           <td>
                             {et ? (
                               <div className="d-flex align-items-center gap-2">
-                                <span className={`badge bg-${et.color || "primary"} rounded-circle p-1`}
-                                  style={{ width: 8, height: 8, display: "inline-block" }}
+                                <span
+                                  className={`badge bg-${et.color || "primary"} rounded-circle p-1`}
+                                  style={{
+                                    width: 8,
+                                    height: 8,
+                                    display: "inline-block",
+                                  }}
                                 />
                                 <span>{et.title}</span>
                               </div>
@@ -289,10 +316,13 @@ const Bookings = () => {
 
                           {/* Date / time */}
                           <td>
-                            <div className="fw-semibold">{formatDateTimeLocal(bk.start_time)}</div>
+                            <div className="fw-semibold">
+                              {formatDateTimeLocal(bk.start_time)}
+                            </div>
                             {et && (
                               <small className="text-muted">
-                                <i className="ri-time-line me-1"></i>{et.duration_minutes} min
+                                <i className="ri-time-line me-1"></i>
+                                {et.duration_minutes} min
                               </small>
                             )}
                           </td>
@@ -303,7 +333,8 @@ const Bookings = () => {
                               {badgeConfig.icon && (
                                 <i className={`${badgeConfig.icon} me-1`}></i>
                               )}
-                              {bk.status.charAt(0).toUpperCase() + bk.status.slice(1)}
+                              {bk.status.charAt(0).toUpperCase() +
+                                bk.status.slice(1)}
                             </Badge>
                             {bk.status === "cancelled" && bk.cancel_reason && (
                               <div className="text-muted small mt-1">
@@ -361,9 +392,14 @@ const Bookings = () => {
         </Card>
 
         {/* ── Cancel Confirm Modal ───────────────────────────────────────── */}
-        <Modal isOpen={cancelModal} toggle={() => setCancelModal(false)} centered>
+        <Modal
+          isOpen={cancelModal}
+          toggle={() => setCancelModal(false)}
+          centered
+        >
           <ModalHeader toggle={() => setCancelModal(false)}>
-            <i className="ri-close-circle-line me-2 text-danger"></i>Cancel Booking
+            <i className="ri-close-circle-line me-2 text-danger"></i>Cancel
+            Booking
           </ModalHeader>
           <ModalBody>
             <p className="mb-3">
@@ -373,7 +409,8 @@ const Bookings = () => {
             </p>
             <FormGroup>
               <Label for="cancel-reason">
-                Cancellation Reason <span className="text-muted small">(optional)</span>
+                Cancellation Reason{" "}
+                <span className="text-muted small">(optional)</span>
               </Label>
               <Input
                 type="textarea"
@@ -396,97 +433,133 @@ const Bookings = () => {
         </Modal>
 
         {/* ── Detail Modal ─────────────────────────────────────────────────── */}
-        <Modal isOpen={detailModal} toggle={() => setDetailModal(false)} scrollable>
+        <Modal
+          isOpen={detailModal}
+          toggle={() => setDetailModal(false)}
+          scrollable
+        >
           <ModalHeader toggle={() => setDetailModal(false)}>
-            <i className="ri-information-line me-2 text-primary"></i>Booking Details
+            <i className="ri-information-line me-2 text-primary"></i>Booking
+            Details
           </ModalHeader>
           <ModalBody>
-            {detailTarget && (() => {
-              const bk = detailTarget;
-              const et = eventTypeMap[bk.event_type_id];
-              return (
-                <div>
-                  {/* Booking ID */}
-                  <div className="mb-3">
-                    <small className="text-muted text-uppercase fw-semibold">Booking ID</small>
-                    <div className="font-monospace">{bk.id}</div>
-                  </div>
-
-                  {/* Attendee */}
-                  <div className="mb-3">
-                    <small className="text-muted text-uppercase fw-semibold">Attendee</small>
-                    <div className="fw-semibold">{bk.attendee_name}</div>
-                    <div className="text-muted">{bk.attendee_email}</div>
-                    <div className="text-muted small">
-                      <i className="ri-global-line me-1"></i>{bk.attendee_timezone}
-                    </div>
-                  </div>
-
-                  {/* Event */}
-                  <div className="mb-3">
-                    <small className="text-muted text-uppercase fw-semibold">Event Type</small>
-                    <div>{et?.title || bk.event_type_id}</div>
-                  </div>
-
-                  {/* Time */}
-                  <div className="mb-3">
-                    <small className="text-muted text-uppercase fw-semibold">Date &amp; Time</small>
-                    <div>{formatDateTimeLocal(bk.start_time)}</div>
-                    <div className="text-muted small">to {formatDateTimeLocal(bk.end_time)}</div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="mb-3">
-                    <small className="text-muted text-uppercase fw-semibold">Status</small>
-                    <div>
-                      <Badge color={STATUS_BADGE[bk.status]?.color || "secondary"}>
-                        {bk.status}
-                      </Badge>
-                      {bk.cancel_reason && (
-                        <span className="ms-2 text-muted small">{bk.cancel_reason}</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Meet link */}
-                  {bk.meet_link && (
+            {detailTarget &&
+              (() => {
+                const bk = detailTarget;
+                const et = eventTypeMap[bk.event_type_id];
+                return (
+                  <div>
+                    {/* Booking ID */}
                     <div className="mb-3">
-                      <small className="text-muted text-uppercase fw-semibold">Meeting Link</small>
-                      <div>
-                        <a href={bk.meet_link} target="_blank" rel="noreferrer">
-                          {bk.meet_link}
-                        </a>
+                      <small className="text-muted text-uppercase fw-semibold">
+                        Booking ID
+                      </small>
+                      <div className="font-monospace">{bk.id}</div>
+                    </div>
+
+                    {/* Attendee */}
+                    <div className="mb-3">
+                      <small className="text-muted text-uppercase fw-semibold">
+                        Attendee
+                      </small>
+                      <div className="fw-semibold">{bk.attendee_name}</div>
+                      <div className="text-muted">{bk.attendee_email}</div>
+                      <div className="text-muted small">
+                        <i className="ri-global-line me-1"></i>
+                        {bk.attendee_timezone}
                       </div>
                     </div>
-                  )}
 
-                  {/* Custom answers */}
-                  {bk.custom_answers?.length > 0 && (
+                    {/* Event */}
                     <div className="mb-3">
-                      <small className="text-muted text-uppercase fw-semibold">Custom Answers</small>
-                      {bk.custom_answers.map((a, idx) => (
-                        <div key={idx} className="mt-2">
-                          <div className="text-muted small">{a.label}</div>
-                          <div className="fw-semibold">{a.answer}</div>
-                        </div>
-                      ))}
+                      <small className="text-muted text-uppercase fw-semibold">
+                        Event Type
+                      </small>
+                      <div>{et?.title || bk.event_type_id}</div>
                     </div>
-                  )}
 
-                  {/* Booked at */}
-                  <div>
-                    <small className="text-muted text-uppercase fw-semibold">Booked At</small>
-                    <div className="text-muted small">{formatDateTimeLocal(bk.created_at)}</div>
+                    {/* Time */}
+                    <div className="mb-3">
+                      <small className="text-muted text-uppercase fw-semibold">
+                        Date &amp; Time
+                      </small>
+                      <div>{formatDateTimeLocal(bk.start_time)}</div>
+                      <div className="text-muted small">
+                        to {formatDateTimeLocal(bk.end_time)}
+                      </div>
+                    </div>
+
+                    {/* Status */}
+                    <div className="mb-3">
+                      <small className="text-muted text-uppercase fw-semibold">
+                        Status
+                      </small>
+                      <div>
+                        <Badge
+                          color={STATUS_BADGE[bk.status]?.color || "secondary"}
+                        >
+                          {bk.status}
+                        </Badge>
+                        {bk.cancel_reason && (
+                          <span className="ms-2 text-muted small">
+                            {bk.cancel_reason}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Meet link */}
+                    {bk.meet_link && (
+                      <div className="mb-3">
+                        <small className="text-muted text-uppercase fw-semibold">
+                          Meeting Link
+                        </small>
+                        <div>
+                          <a
+                            href={bk.meet_link}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {bk.meet_link}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Custom answers */}
+                    {bk.custom_answers?.length > 0 && (
+                      <div className="mb-3">
+                        <small className="text-muted text-uppercase fw-semibold">
+                          Custom Answers
+                        </small>
+                        {bk.custom_answers.map((a, idx) => (
+                          <div key={idx} className="mt-2">
+                            <div className="text-muted small">{a.label}</div>
+                            <div className="fw-semibold">{a.answer}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Booked at */}
+                    <div>
+                      <small className="text-muted text-uppercase fw-semibold">
+                        Booked At
+                      </small>
+                      <div className="text-muted small">
+                        {formatDateTimeLocal(bk.created_at)}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              );
-            })()}
+                );
+              })()}
           </ModalBody>
           <ModalFooter>
-            <Button color="light" onClick={() => setDetailModal(false)}>Close</Button>
+            <Button color="light" onClick={() => setDetailModal(false)}>
+              Close
+            </Button>
           </ModalFooter>
         </Modal>
-
       </div>
     </div>
   );

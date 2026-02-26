@@ -1,13 +1,7 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  CardBody,
-} from "reactstrap";
+import { Container, Row, Col, Card, CardBody } from "reactstrap";
 import { selectActiveEventTypes } from "../../slices/booking";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -30,8 +24,8 @@ const CARD_COLORS = {
   primary: { bg: "bg-primary bg-opacity-10", text: "text-primary" },
   success: { bg: "bg-success bg-opacity-10", text: "text-success" },
   warning: { bg: "bg-warning bg-opacity-10", text: "text-warning" },
-  info:    { bg: "bg-info bg-opacity-10",    text: "text-info"    },
-  danger:  { bg: "bg-danger bg-opacity-10",  text: "text-danger"  },
+  info: { bg: "bg-info bg-opacity-10", text: "text-info" },
+  danger: { bg: "bg-danger bg-opacity-10", text: "text-danger" },
 };
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -43,7 +37,7 @@ const EventSelectionPage = () => {
 
   // Filter to the owner's event types
   const ownerEventTypes = eventTypes.filter(
-    (et) => et.owner_slug === ownerSlug
+    (et) => et.owner_slug === ownerSlug,
   );
 
   // Derive owner display name from slug (capitalise first word)
@@ -65,7 +59,6 @@ const EventSelectionPage = () => {
       <Container>
         <Row className="justify-content-center">
           <Col md={6} lg={5}>
-
             {/* ── Header ─────────────────────────────────────────────── */}
             <div className="text-center mb-4">
               {/* Avatar */}
@@ -108,18 +101,22 @@ const EventSelectionPage = () => {
                   >
                     <CardBody>
                       <div className="d-flex align-items-center gap-3">
-
                         {/* ── Left: Icon + Select ───────────────────── */}
                         <div className="d-flex flex-column align-items-center gap-2 flex-shrink-0">
                           <div
                             className={`rounded-circle d-flex align-items-center justify-content-center ${color.bg}`}
                             style={{ width: 48, height: 48 }}
                           >
-                            <i className={`ri-calendar-event-line fs-20 ${color.text}`} />
+                            <i
+                              className={`ri-calendar-event-line fs-20 ${color.text}`}
+                            />
                           </div>
                           <button
                             className={`btn btn-sm btn-soft-${et.color || "primary"} px-3`}
-                            onClick={(e) => { e.stopPropagation(); handleSelect(et); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelect(et);
+                            }}
                           >
                             Select
                           </button>
@@ -148,7 +145,6 @@ const EventSelectionPage = () => {
                             </span>
                           </div>
                         </div>
-
                       </div>
                     </CardBody>
                   </Card>
@@ -163,7 +159,6 @@ const EventSelectionPage = () => {
                 Powered by <strong>BookingModule</strong>
               </p>
             </div>
-
           </Col>
         </Row>
       </Container>
