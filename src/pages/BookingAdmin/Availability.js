@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 import {
   Card,
   CardBody,
@@ -74,6 +75,13 @@ function formatDateDisplay(dateStr) {
   });
 }
 
+/** Validate function: converts HH:mm to minutesfor easy comparison */
+const isValidTimeRange = (start, end) => {
+  const [startH, startM] = start.split(":").map(Number);
+  const [endH, endM] = end.split(":").map(Number);
+  return startH * 60 + startM < endH * 60 + endM;
+};
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 const Availability = () => {
@@ -131,6 +139,20 @@ const Availability = () => {
   const handleTimeSave = (dayIndex) => {
     const local = localTimes[dayIndex];
     if (!local) return;
+
+    // Validate time range
+    if (!isValidTimeRange(local.start, local.end)) {
+      const dayLabel =
+        DAYS.find((d) => d.index === dayIndex)?.label || "this day";
+      toast.error(
+        `Invalid time range on ${dayLabel}: End time must be after start time`,
+        {
+          autoClose: 3000,
+        },
+      );
+      return;
+    }
+
     dispatch(
       updateRecurringDay({
         day_of_week: dayIndex,

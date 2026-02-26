@@ -464,9 +464,9 @@ const authProtectedRoutes = [
   { path: "/profile", component: <UserProfile /> },
 
   // ── Booking Admin (Owner Flow) ───────────────────────────────────────────
-  { path: "/dashboard/event-types", component: <AdminEventTypes /> },
-  { path: "/dashboard/availability", component: <AdminAvailability /> },
-  { path: "/dashboard/bookings", component: <AdminBookings /> },
+  { path: "/pages-event-types", component: <AdminEventTypes /> },
+  { path: "/pages-availability", component: <AdminAvailability /> },
+  { path: "/pages-bookings", component: <AdminBookings /> },
 
   // this route should be at the end of all other routes
   // eslint-disable-next-line react/display-name

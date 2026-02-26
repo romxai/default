@@ -143,7 +143,8 @@ const BookingConfirmationPage = () => {
                   <div className="d-flex align-items-start gap-3">
                     <i className="ri-timer-line text-primary fs-18 flex-shrink-0 mt-1" />
                     <div>
-                      <p className="fw-semibold mb-0">
+                      <p className="fw-semibold mb-0">Duration</p>
+                      <p className="text-muted fs-13 mb-0">
                         {eventType.duration_minutes} minutes
                       </p>
                     </div>
@@ -176,14 +177,31 @@ const BookingConfirmationPage = () => {
                     </div>
                   </div>
 
-                  <div className="d-flex align-items-start gap-3">
-                    <i className="ri-global-line text-primary fs-18 flex-shrink-0 mt-1" />
-                    <div>
-                      <p className="text-muted fs-13 mb-0">
-                        {booking.attendee_timezone}
-                      </p>
+                  {/* Guests */}
+                  {booking.guests?.length > 0 && (
+                    <div className="d-flex align-items-start gap-3">
+                      <i className="ri-group-line text-primary fs-18 flex-shrink-0 mt-1" />
+                      <div className="flex-grow-1">
+                        <p className="fw-semibold mb-1">Guests</p>
+                        {booking.guests.map((guestEmail, idx) => (
+                          <p key={idx} className="text-muted fs-13 mb-0">
+                            {guestEmail}
+                          </p>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {/* Notes */}
+                  {booking.notes && (
+                    <div className="d-flex align-items-start gap-3">
+                      <i className="ri-file-text-line text-primary fs-18 flex-shrink-0 mt-1" />
+                      <div>
+                        <p className="fw-semibold mb-1">Notes</p>
+                        <p className="text-muted fs-13 mb-0">{booking.notes}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Show custom answers if any */}

@@ -13,6 +13,7 @@ import {
   Input,
   FormFeedback,
   Button,
+  Spinner,
 } from "reactstrap";
 import { addBooking } from "../../slices/booking/bookingsSlice";
 import { selectEventTypeBySlug } from "../../slices/booking";
@@ -55,8 +56,9 @@ const BookingFormPage = () => {
   const [fields, setFields] = useState({
     attendee_name: "",
     attendee_email: "",
-    attendee_timezone: clientTz,
+    notes: "",
   });
+  const [guests, setGuests] = useState([]);
   const [customAnswers, setCustomAnswers] = useState(
     (eventType?.custom_questions ?? []).reduce((acc, q) => {
       acc[q.id] = "";
@@ -93,6 +95,14 @@ const BookingFormPage = () => {
     if (!fields.attendee_email.trim()) e.attendee_email = "Email is required.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.attendee_email))
       e.attendee_email = "Please enter a valid email address.";
+
+    // Validate guest emails
+    guests.forEach((guestEmail, idx) => {
+      if (guestEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+        e[`guest_${idx}`] = "Please enter a valid email address.";
+      }
+    });
+
     // Required custom questions
     (eventType.custom_questions ?? []).forEach((q) => {
       if (q.required && !customAnswers[q.id]?.toString().trim())
@@ -104,6 +114,10 @@ const BookingFormPage = () => {
   // ── Submit ───────────────────────────────────────────────────────────────
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Prevent double-fire
+    if (submitting) return;
+
     const errs = validate();
     if (Object.keys(errs).length) {
       setErrors(errs);
@@ -115,7 +129,9 @@ const BookingFormPage = () => {
       event_type_id: eventType.id,
       attendee_name: fields.attendee_name.trim(),
       attendee_email: fields.attendee_email.trim(),
-      attendee_timezone: fields.attendee_timezone,
+      attendee_timezone: clientTz,
+      notes: fields.notes.trim(),
+      guests: guests.filter((g) => g.trim()).map((g) => g.trim()),
       start_time: slot.start,
       end_time: slot.end,
       custom_answers: (eventType.custom_questions ?? []).map((q) => ({
@@ -125,12 +141,16 @@ const BookingFormPage = () => {
       })),
     };
 
-    dispatch(addBooking(newBooking));
+    // Fake a network delay of 1.5 seconds to prevent double-click
+    setTimeout(() => {
+      dispatch(addBooking(newBooking));
+      setSubmitting(false);
 
-    // Navigate to confirmation page with booking payload in state
-    navigate(`/book/${ownerSlug}/${eventTypeSlug}/confirmed`, {
-      state: { booking: { ...newBooking }, eventType },
-    });
+      // Navigate to confirmation page with booking payload in state
+      navigate(`/book/${ownerSlug}/${eventTypeSlug}/confirmed`, {
+        state: { booking: { ...newBooking }, eventType },
+      });
+    }, 1500);
   };
 
   const handleFieldChange = (e) => {
@@ -141,6 +161,28 @@ const BookingFormPage = () => {
   const handleCustomChange = (id, value) => {
     setCustomAnswers((prev) => ({ ...prev, [id]: value }));
     setErrors((prev) => ({ ...prev, [id]: undefined }));
+  };
+
+  const handleAddGuest = () => {
+    if (guests.length < 5) {
+      setGuests([...guests, ""]);
+    }
+  };
+
+  const handleGuestChange = (index, value) => {
+    const newGuests = [...guests];
+    newGuests[index] = value;
+    setGuests(newGuests);
+    setErrors((prev) => ({ ...prev, [`guest_${index}`]: undefined }));
+  };
+
+  const handleRemoveGuest = (index) => {
+    setGuests(guests.filter((_, i) => i !== index));
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      delete newErrors[`guest_${index}`];
+      return newErrors;
+    });
   };
 
   const locationLabel =
@@ -233,20 +275,66 @@ const BookingFormPage = () => {
                   </FormGroup>
 
                   <FormGroup>
-                    <Label for="attendee_timezone" className="fw-medium fs-14">
-                      Timezone
+                    <Label for="notes" className="fw-medium fs-14">
+                      Additional Notes
                     </Label>
                     <Input
-                      id="attendee_timezone"
-                      name="attendee_timezone"
-                      type="text"
-                      value={fields.attendee_timezone}
-                      readOnly
-                      className="bg-light"
+                      id="notes"
+                      name="notes"
+                      type="textarea"
+                      rows={3}
+                      placeholder="Please share anything that will help prepare for our meeting."
+                      value={fields.notes}
+                      onChange={handleFieldChange}
                     />
-                    <small className="text-muted fs-12">
-                      Auto-detected from your browser.
-                    </small>
+                  </FormGroup>
+
+                  {/* Guest emails */}
+                  <FormGroup>
+                    <Label className="fw-medium fs-14 d-flex align-items-center justify-content-between">
+                      <span>Guests</span>
+                      {guests.length < 5 && (
+                        <Button
+                          color="link"
+                          size="sm"
+                          className="p-0 text-decoration-none"
+                          onClick={handleAddGuest}
+                        >
+                          <i className="ri-add-line me-1" />
+                          Add Guest
+                        </Button>
+                      )}
+                    </Label>
+                    {guests.length === 0 && (
+                      <small className="text-muted d-block mb-2">
+                        Add up to 5 guests to this event
+                      </small>
+                    )}
+                    {guests.map((guest, idx) => (
+                      <div key={idx} className="d-flex gap-2 mb-2">
+                        <Input
+                          type="email"
+                          placeholder={`Guest ${idx + 1} email`}
+                          value={guest}
+                          onChange={(e) =>
+                            handleGuestChange(idx, e.target.value)
+                          }
+                          invalid={!!errors[`guest_${idx}`]}
+                        />
+                        <Button
+                          color="light"
+                          size="sm"
+                          onClick={() => handleRemoveGuest(idx)}
+                        >
+                          <i className="ri-close-line" />
+                        </Button>
+                        {errors[`guest_${idx}`] && (
+                          <FormFeedback className="d-block">
+                            {errors[`guest_${idx}`]}
+                          </FormFeedback>
+                        )}
+                      </div>
+                    ))}
                   </FormGroup>
 
                   {/* Custom questions */}
@@ -291,7 +379,7 @@ const BookingFormPage = () => {
                     >
                       {submitting ? (
                         <>
-                          <span className="spinner-border spinner-border-sm me-2" />
+                          <Spinner size="sm" className="me-2" />
                           Confirming…
                         </>
                       ) : (

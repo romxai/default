@@ -213,6 +213,23 @@ export const selectCurrentBooking = (state) =>
   state.BookingBookings.selectedBooking;
 
 /**
+ * Scrubbed selector for public booking flow.
+ * Returns only the time slots and durations needed to block out calendar,
+ * without exposing sensitive attendee details.
+ *
+ * Usage in CalendarTimeSlotPage.js:
+ *   const blockedTimes = useSelector(selectPublicBlockedTimes);
+ */
+export const selectPublicBlockedTimes = (state) => {
+  return state.BookingBookings.items
+    .filter((b) => b.status === "confirmed")
+    .map((booking) => ({
+      startTime: booking.start_time,
+      endTime: booking.end_time,
+    }));
+};
+
+/**
  * Double-booking prevention check.
  *
  * Returns true if the proposed [proposedStart, proposedEnd] window overlaps

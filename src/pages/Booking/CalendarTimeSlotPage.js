@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Container, Row, Col, Card, CardBody, Button } from "reactstrap";
 import {
@@ -9,6 +9,7 @@ import {
   selectOverrideForDate,
   selectAllBookings,
   selectAllEventTypes,
+  selectOwnerTimezone,
 } from "../../slices/booking";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -94,9 +95,17 @@ const isSlotTaken = (startISO, endISO, bookings, allEventTypes) => {
  * @param {object} eventType - the selected event type
  * @param {object[]} bookings
  * @param {object[]} allEventTypes
+ * @param {string} ownerTimezone - IANA timezone of the owner (e.g., "Asia/Kolkata")
  * @returns {Array<{ start: string, end: string }>}
  */
-const generateSlots = (dateStr, rule, eventType, bookings, allEventTypes) => {
+const generateSlots = (
+  dateStr,
+  rule,
+  eventType,
+  bookings,
+  allEventTypes,
+  ownerTimezone,
+) => {
   if (!rule || !rule.is_available) return [];
 
   const startMins = hmToMins(rule.start_time_utc);
@@ -108,10 +117,12 @@ const generateSlots = (dateStr, rule, eventType, bookings, allEventTypes) => {
 
   let cursor = startMins;
   while (cursor + duration <= endMins) {
-    // Build UTC ISO strings for this slot on dateStr
-    const slotStartUTC = new Date(
-      `${dateStr}T${String(Math.floor(cursor / 60)).padStart(2, "0")}:${String(cursor % 60).padStart(2, "0")}:00Z`,
-    );
+    // Convert owner's local time to UTC
+    const hourStr = String(Math.floor(cursor / 60)).padStart(2, "0");
+    const minStr = String(cursor % 60).padStart(2, "0");
+
+    // Create a UTC timestamp representing this time in the owner's timezone
+    const slotStartUTC = convertToUTC(dateStr, hourStr, minStr, ownerTimezone);
     const slotEndUTC = new Date(slotStartUTC.getTime() + duration * 60_000);
 
     // Min-notice check – slot must not start too soon
@@ -133,6 +144,60 @@ const generateSlots = (dateStr, rule, eventType, bookings, allEventTypes) => {
     cursor += duration;
   }
   return slots;
+};
+
+/**
+ * Convert a local date/time in a specific timezone to a UTC Date object
+ * @param {string} dateStr - "YYYY-MM-DD"
+ * @param {string} hourStr - "HH" (00-23)
+ * @param {string} minStr - "mm" (00-59)
+ * @param {string} timezone - IANA timezone string
+ * @returns {Date} UTC Date object
+ */
+const convertToUTC = (dateStr, hourStr, minStr, timezone) => {
+  // Parse date components
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const hour = Number(hourStr);
+  const minute = Number(minStr);
+
+  // Create a date string that represents the local time in the target timezone
+  // We'll format a known UTC time and see how it appears in the target timezone,
+  // then calculate the offset
+
+  // Start with midnight UTC on this date
+  const referenceUTC = Date.UTC(year, month - 1, day, 12, 0, 0); // Use noon to avoid DST edge cases
+  const referenceDate = new Date(referenceUTC);
+
+  // Format this date in the target timezone to see what time it shows
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZoneName: "short",
+  });
+
+  const parts = formatter.formatToParts(referenceDate);
+  const tzYear = Number(parts.find((p) => p.type === "year").value);
+  const tzMonth = Number(parts.find((p) => p.type === "month").value);
+  const tzDay = Number(parts.find((p) => p.type === "day").value);
+  const tzHour = Number(parts.find((p) => p.type === "hour").value);
+  const tzMinute = Number(parts.find((p) => p.type === "minute").value);
+
+  // Calculate the offset: difference between UTC time and local time
+  const localMs = Date.UTC(tzYear, tzMonth - 1, tzDay, tzHour, tzMinute, 0);
+  const offsetMs = referenceUTC - localMs;
+
+  // Now apply this offset to our target time
+  // Our target is: year-month-day hour:minute in the owner's timezone
+  // To get UTC, we subtract the offset
+  const targetLocalMs = Date.UTC(year, month - 1, day, hour, minute, 0);
+  const targetUTCMs = targetLocalMs + offsetMs;
+
+  return new Date(targetUTCMs);
 };
 
 /** Build a 6×7 grid of day numbers (0 = empty padding cell) */
@@ -167,6 +232,7 @@ const CalendarTimeSlotPage = () => {
   const allEventTypes = useSelector(selectAllEventTypes);
   const rules = useSelector(selectAllRules);
   const bookings = useSelector(selectAllBookings);
+  const ownerTimezone = useSelector(selectOwnerTimezone);
 
   // ── Local state ──────────────────────────────────────────────────────────
   const today = new Date();
@@ -256,8 +322,9 @@ const CalendarTimeSlotPage = () => {
       eventType,
       bookings,
       allEventTypes,
+      ownerTimezone,
     );
-  }, [selectedDate, eventType, rules, bookings, allEventTypes]);
+  }, [selectedDate, eventType, rules, bookings, allEventTypes, ownerTimezone]);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleDayClick = (dayNum) => {
@@ -279,17 +346,7 @@ const CalendarTimeSlotPage = () => {
 
   // ── Guard ─────────────────────────────────────────────────────────────────
   if (!eventType) {
-    return (
-      <div className="min-vh-100 bg-light d-flex align-items-center justify-content-center">
-        <div className="text-center">
-          <i className="ri-calendar-close-line display-4 text-muted d-block mb-3" />
-          <p className="text-muted">Event type not found.</p>
-          <Button color="primary" onClick={handleBack}>
-            Go Back
-          </Button>
-        </div>
-      </div>
-    );
+    return <Navigate to="/pages-404" replace />;
   }
 
   const locationIcon =
@@ -299,10 +356,10 @@ const CalendarTimeSlotPage = () => {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-vh-100 bg-light py-5">
-      <Container fluid="lg">
+    <div className="vh-100 bg-light d-flex flex-column">
+      <Container fluid="lg" className="py-3 flex-shrink-0">
         {/* Back link */}
-        <div className="mb-3">
+        <div className="mb-2">
           <button
             className="btn btn-link text-muted p-0 fs-13"
             onClick={handleBack}
@@ -311,12 +368,22 @@ const CalendarTimeSlotPage = () => {
             Back to event types
           </button>
         </div>
+      </Container>
 
-        {/* ── Main 3-panel Card ─────────────────────────────────────── */}
-        <Card className="shadow-sm border-0 overflow-hidden">
-          <Row className="g-0 min-vh-50">
+      <Container
+        fluid="lg"
+        className="flex-grow-1 pb-3"
+        style={{ minHeight: 0 }}
+      >
+        {/* ── Main 3-panel Card ────────────────────────────────── */}
+        <Card className="shadow-sm border-0 overflow-hidden h-100">
+          <Row className="g-0 h-100">
             {/* ══ Panel 1 ── Event Details (bg-light) ════════════════ */}
-            <Col md={3} className="bg-light border-end p-4 d-flex flex-column">
+            <Col
+              md={3}
+              className="bg-light border-end p-4 d-flex flex-column"
+              style={{ maxHeight: "100%", overflow: "auto" }}
+            >
               {/* Owner avatar */}
               <div className="mb-3">
                 <div
@@ -366,7 +433,11 @@ const CalendarTimeSlotPage = () => {
             </Col>
 
             {/* ══ Panel 2 ── Calendar ═════════════════════════════════ */}
-            <Col md={5} className="border-end p-4">
+            <Col
+              md={5}
+              className="border-end p-4"
+              style={{ maxHeight: "100%", overflow: "auto" }}
+            >
               <h6 className="fw-semibold mb-4 text-center">Select a Date</h6>
 
               {/* Month navigation */}
@@ -457,10 +528,14 @@ const CalendarTimeSlotPage = () => {
             </Col>
 
             {/* ══ Panel 3 ── Time Slots ═══════════════════════════════ */}
-            <Col md={4} className="p-4 d-flex flex-column">
+            <Col
+              md={4}
+              className="p-4 d-flex flex-column"
+              style={{ maxHeight: "100%" }}
+            >
               {selectedDate ? (
                 <>
-                  <div className="mb-3">
+                  <div className="mb-3 flex-shrink-0">
                     <h6 className="fw-semibold mb-1">
                       {formatDateHeading(selectedDate)}
                     </h6>
@@ -479,8 +554,8 @@ const CalendarTimeSlotPage = () => {
                     </div>
                   ) : (
                     <div
-                      className="overflow-auto flex-grow-1"
-                      style={{ maxHeight: 420 }}
+                      className="overflow-auto flex-grow-1 pe-2"
+                      style={{ minHeight: 0 }}
                     >
                       {availableSlots.map((slot, idx) => (
                         <button

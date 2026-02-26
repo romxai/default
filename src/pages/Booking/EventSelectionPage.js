@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Container, Row, Col, Card, CardBody } from "reactstrap";
 import { selectActiveEventTypes } from "../../slices/booking";
@@ -54,8 +54,13 @@ const EventSelectionPage = () => {
     navigate(`/book/${ownerSlug}/${et.slug}`);
   };
 
+  // Guard Clause: If ownerSlug is missing, redirect safely
+  if (!ownerSlug) {
+    return <Navigate to="/pages-404" replace />;
+  }
+
   return (
-    <div className="min-vh-100 bg-light py-5">
+    <div className="h-[100vh] bg-light py-5 overflow-hidden">
       <Container>
         <Row className="justify-content-center">
           <Col md={6} lg={5}>

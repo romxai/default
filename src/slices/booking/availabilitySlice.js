@@ -6,6 +6,10 @@ import { createSlice } from "@reduxjs/toolkit";
 // rule_type "recurring"  → repeats every week on `day_of_week`
 // rule_type "one_time"   → applies to one specific date (date_override)
 // rule_type "day_off"    → marks a normally-working day as unavailable
+//
+// IMPORTANT: start_time_utc and end_time_utc are misnomers - they represent
+// times in the OWNER'S timezone (configured in ownerTimezone), not UTC.
+// The conversion to UTC happens in the slot generation logic.
 // ---------------------------------------------------------------------------
 const DAY = {
   SUN: 0,
@@ -24,8 +28,8 @@ const MOCK_AVAILABILITY = [
     owner_slug: "dwayne",
     rule_type: "recurring",
     day_of_week: DAY.MON,
-    start_time_utc: "09:00", // HH:mm in owner's configured timezone (UTC for mock)
-    end_time_utc: "17:00",
+    start_time_utc: "09:00", // HH:mm in owner's timezone (Asia/Kolkata)
+    end_time_utc: "17:00", // HH:mm in owner's timezone (Asia/Kolkata)
     is_available: true,
     date_override: null,
   },
@@ -131,7 +135,7 @@ const MOCK_AVAILABILITY = [
 // ---------------------------------------------------------------------------
 const initialState = {
   rules: MOCK_AVAILABILITY,
-  ownerTimezone: "UTC", // displayed in admin UI; override per owner in Phase 4
+  ownerTimezone: "Asia/Kolkata", // displayed in admin UI; override per owner in Phase 4
   isLoading: false,
   error: null,
 };
